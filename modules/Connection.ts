@@ -1,16 +1,19 @@
-const request = require("request")
-const Client = require('./connection/player/Client.js');
-var config = require("../config");
-const protocol = require("./server/protocol.js");
-const captchaStates = require("./connection/captcha/captchaStates.js");
-const worldTemplate = require("./connection/world/worldTemplate.js");
-const permissions = require("./connection/player/permissions.js")
-const Case = require('./connection/player/cases.js');
-const Bucket = require("./connection/player/Bucket.js")
-const Commands = require("./connection/commands/Commands.js")
-const Captcha = require("./connection/captcha/Captcha.js");
+import { server } from "../server";
 
-class Connection {
+import { Client } from './connection/player/Client';
+import { permissions } from "./connection/player/permissions";
+import { WorldTemplate } from "./connection/world/worldTemplate";
+import { Captcha } from "./connection/captcha/Captcha";
+import { Commands } from "./connection/commands/Commands";
+import { Case } from "./connection/player/cases";
+
+export class Connection {
+    ws: any;
+    req: any;
+    world: any;
+    client: any;
+    player: boolean;
+    captcha: any;
     constructor(ws, req) {
         this.ws = ws;
         this.req = req;
@@ -88,7 +91,7 @@ class Connection {
                 }.bind(this));
                 if (!this.world) {
                     server.manager.world_init(this.client.world)
-                    this.world = new worldTemplate(this.client.world);
+                    this.world = new WorldTemplate(this.client.world);
                     server.worlds.push(this.world)
                     server.events.emit("newWorld", this.world)
                 }
@@ -151,7 +154,7 @@ class Connection {
             this.world.clients.sort().pop()
         }
         if (!this.world.clients.length) {
-            server.manager.world_unload()
+            server.manager.world_unload(this.world.name);
             delete server.worlds[worldIndex]
             server.worlds.sort().pop()
         }
@@ -160,4 +163,4 @@ class Connection {
         console.log(error);
     }
 }
-module.exports = Connection
+// module.exports = Connection

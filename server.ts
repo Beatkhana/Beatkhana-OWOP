@@ -4,24 +4,25 @@ let wss = bkWS.owopWS;
 
 let bkSession = require("../session");
 
-const fs = require("fs");
-const ws = require("ws");
-const request = require("request");
-const EventEmitter = require("events");
+import fs from "fs";
+import ws from "ws";
+import request from "request";
 
-const Connection = require('./modules/Connection.js');
-const UpdateClock = require("./modules/server/UpdateClock.js")
-const manager = require("./modules/server/manager.js")
+import { Connection } from './modules/Connection';
+import { UpdateClock } from "./modules/server/UpdateClock";
+import * as manager from "./modules/server/manager";
 var bansIgnore = false;
+
 // var wss;
 var config = require("./config.json");
 var terminatedSocketServer = false;
-const ConfigManager = require("./modules/server/ConfigManager.js")
-const BansManager = require("./modules/server/BansManager.js")
-const proxy_check = require('proxycheck-node.js');
+import { ConfigManager } from "./modules/server/ConfigManager";
+import { BansManager } from "./modules/server/BansManager";
+import proxy_check from 'proxycheck-node.js';
+import { EventEmitter } from "events";
 
 
-global.server = {
+export const server = {
     chalk: require("chalk"),
     worlds: [],
     bans: require("./bans.json"),
@@ -33,7 +34,7 @@ global.server = {
     disabledScripts: [],
     ConfigManager,
     bansManager: new BansManager(),
-    players: require("./modules/connection/player/players.js"),
+    players: require("./modules/connection/player/players"),
     antiProxy: new proxy_check({
         api_key: config.antiProxy.key
     })
@@ -119,23 +120,21 @@ function createWSServer() {
     });
 }
 
-function beginServer() {
+export function beginServer() {
     createWSServer()
     console.log("Server started. Type /help for help")
 }
-
-exports.beginServer = beginServer;
 
 var rl = require("readline").createInterface({
     input: process.stdin,
     output: process.stdout
 });
 //server controler
-if (process.platform === "win32") {
-    rl.on("SIGINT", function () {
-        process.emit("SIGINT");
-    });
-}
+// if (process.platform === "win32") {
+//     rl.on("SIGINT", function () {
+//         return process.emit("SIGINT");
+//     });
+// }
 async function exit() {
     console.log("Exiting...");
     for (var w in server.worlds) {
@@ -150,8 +149,10 @@ async function exit() {
 }
 process.on("SIGINT", exit)
 process.on("beforeExit", exit);
-var serverOpNick = "";
+
+var serverOpNick = "All Seeing Overlord";
 var serverOpRank = 3;
+
 rl.on("line", function (d) {
     var msg = d.toString().trim();
     if (terminatedSocketServer) return;
@@ -191,7 +192,7 @@ rl.on("line", function (d) {
             }
         }
     } else {
-        function sendToWorlds(msg) {
+        let sendToWorlds = (msg) => {
             for (var gw in server.worlds) {
                 var worldCurrent = server.worlds[gw];
                 var clientsOfWorld = worldCurrent.clients;

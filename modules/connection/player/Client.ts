@@ -1,8 +1,31 @@
-const Bucket = require('./Bucket');
-const protocol = require("../../server/protocol.js");
-const permissions = require("./permissions.js")
+import { protocol } from '../../server/protocol';
+import { Bucket } from './Bucket';
+import { permissions } from './permissions';
 var config = require("../../../config");
-class Client {
+
+export class Client {
+
+    ws: any;
+    req: any;
+    x_pos: number;
+    y_pos: number;
+    col_r: number;
+    col_g: number;
+    col_b: number;
+    tool: number;
+    id: number;
+    nick: string;
+    before: string;
+    send: (data: any) => void;
+    stealth: boolean;
+    rank: number;
+    ip: any;
+    world: string;
+    pixelBucket: any;
+    chatBucket: any;
+    x: any;
+    y: any;
+
     constructor(ws, req) {
         this.ws = ws;
         this.req = req;
@@ -16,6 +39,7 @@ class Client {
         this.nick = "";
         if (req.session?.user?.length > 0) {
             this.nick = req.session.user[0].name;
+            this.id = req.session.user[0].discordId;
         }
         this.before = "";
         this.send = function (data) {
@@ -59,18 +83,18 @@ class Client {
         this.setPixelBucket(pixelBucket[0], pixelBucket[1])
         this.setChatBucket(chatBucket[0], chatBucket[1])
     }
-    setId(id) {
-        this.id = id
+    setId(id: Uint8Array) {
+        this.id = +id;
         var id = new Uint8Array(5);
         var id_dv = new DataView(id.buffer);
         id_dv.setUint8(0, protocol.server.setId);
         id_dv.setUint32(1, this.id, true);
-        this.send(id)
+        this.send(id);
     }
     teleport(x, y) {
-        this.x = x
-        this.y = y
-        let tp = new Uint8Array(9)
+        this.x = x;
+        this.y = y;
+        let tp = new Uint8Array(9);
         let tp_dv = new DataView(tp.buffer);
         tp_dv.setUint8(0, protocol.server.teleport);
         tp_dv.setUint32(1, x, true);
@@ -79,4 +103,4 @@ class Client {
     }
 };
 
-module.exports = Client;
+// module.exports = Client;
