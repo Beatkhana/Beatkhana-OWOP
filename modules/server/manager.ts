@@ -93,7 +93,7 @@ export function get_chunk(worldName, x, y) {
         return null;
     }
     var lookup = 3 * ((x & 31) + (y & 31) * 32);
-    var chunkpos = +file_read(fd, lookup, 3);
+    var chunkpos: Buffer | Number = file_read(fd, lookup, 3);
     chunkpos = chunkpos[2] * 16777216 + chunkpos[1] * 65536 + chunkpos[0] * 256;
     if (chunkpos == 0) {
         return null;
@@ -125,7 +125,7 @@ export function set_chunk(worldName, x, y, cdata) { // cdata = 16*16*3 RGB
         file_write(fd, clusterSize, new Uint8Array(3072 - clusterSize));
     }
     var lookup = 3 * ((x & 31) + (y & 31) * 32);
-    var chunkpos = +file_read(fd, lookup, 3);
+    var chunkpos: Buffer | Number = file_read(fd, lookup, 3);
     chunkpos = chunkpos[2] * 16777216 + chunkpos[1] * 65536 + chunkpos[0] * 256;
     if (chunkpos == 0) {
         var val = clusterSize;
