@@ -1,12 +1,54 @@
 // require("./client.js")
-let bkWS = require("../event.controller");
-let wss = bkWS.owopWS;
+import * as WebSocket from 'ws';
 
-let bkSession = require("../session");
+let wss;
+let bkSession = {
+    sessionParser: undefined
+};
+
+let devMode = false;
+let testUser = null;
+
+try {
+    let bkWS = require("../event.controller");
+    wss = bkWS.owopWS;
+
+    bkSession = require("../session");
+} catch (error) {
+    wss = new WebSocket.Server({ port: 9000 });
+    bkSession.sessionParser = (req, res, callback) => {
+        callback();
+    }
+    beginServer();
+    devMode = true;
+    testUser = [
+        {
+            roleIds: [
+                "1",
+                "2",
+                "3"
+            ],
+            discordId: "250204546943418368",
+            ssId: null,
+            name: "Dannypoke03",
+            twitchName: "dannypoke03",
+            avatar: "a_d220cf5d7955815446c626c74fe5cbb5",
+            globalRank: 0,
+            localRank: 0,
+            country: "",
+            tourneyRank: 0,
+            TR: 0,
+            pronoun: "He/Him",
+            roleNames: [
+                "Admin",
+                "Map Pool",
+                "Staff"
+            ]
+        }
+    ]
+}
 
 import fs from "fs";
-import ws from "ws";
-import request from "request";
 
 import { Connection } from './modules/Connection';
 import { UpdateClock } from "./modules/server/UpdateClock";
@@ -69,6 +111,11 @@ function createWSServer() {
     // });
     wss.on("connection", async function (ws, req) {
         await bkSession.sessionParser(req, {}, async () => {
+            if (devMode) {
+                req.session = {
+                    user: testUser
+                }
+            }
             if (terminatedSocketServer) {
                 ws.send(config.closeMsg)
                 ws.close();
