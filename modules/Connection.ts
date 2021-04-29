@@ -96,7 +96,7 @@ export class Connection {
                     server.events.emit("newWorld", this.world)
                 }
 
-                this.client.setRank(permissions.user)
+                this.client.setRank(permissions.user);
 
                 var pass = server.manager.get_prop(this.world.name, "pass");
                 if (pass) {

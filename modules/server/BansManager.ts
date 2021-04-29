@@ -1,6 +1,6 @@
 let bansPath = "./bans.json"
 let bans = require("../../bans.json");
-import fs from "fs";
+import * as fs from 'fs';
 
 export class BansManager {
     bans: any;

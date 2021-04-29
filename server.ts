@@ -48,7 +48,7 @@ try {
     ]
 }
 
-import fs from "fs";
+import * as fs from 'fs';
 
 import { Connection } from './modules/Connection';
 import { UpdateClock } from "./modules/server/UpdateClock";
@@ -60,7 +60,7 @@ var config = require("./config.json");
 var terminatedSocketServer = false;
 import { ConfigManager } from "./modules/server/ConfigManager";
 import { BansManager } from "./modules/server/BansManager";
-import proxy_check from 'proxycheck-node.js';
+let proxy_check = require('proxycheck-node.js');
 import { EventEmitter } from "events";
 
 
