@@ -39,7 +39,7 @@ export class Client {
         this.nick = "";
         if (req.session?.user?.length > 0) {
             this.nick = req.session.user[0].name;
-            this.id = req.session.user[0].discordId;
+            this.id = +req.session.user[0].discordId;
         }
         this.before = "";
         this.send = function (data) {

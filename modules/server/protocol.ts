@@ -8,7 +8,9 @@ export let protocol = {
         captcha: 5,
         setPQuota: 6,
         chunkProtected: 7,
-        maxCount: 8
+        maxCount: 8,
+        initialUpdate: 9,
+        playerJoined: 10
     },
     client: {
         rankVerification: 1,

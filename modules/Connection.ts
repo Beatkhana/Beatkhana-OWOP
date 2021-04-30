@@ -96,17 +96,22 @@ export class Connection {
                     server.events.emit("newWorld", this.world)
                 }
 
-                this.client.setRank(permissions.user);
+                this.client.setRank(permissions.none);
+                // this.client.setRank(permissions.user);
 
-                var pass = server.manager.get_prop(this.world.name, "pass");
-                if (pass) {
-                    this.client.send(" [Server] This world has a password set. Use '/pass PASSWORD' to unlock drawing.")
-                    this.client.setRank(permissions.none)
+                if (this.req.session.user) {
+                    this.client.setRank(permissions.user);
                 }
+                // var pass = server.manager.get_prop(this.world.name, "pass");
+                // if (pass) {
+                //     this.client.send("[Server] This world has a password set. Use '/pass PASSWORD' to unlock drawing.")
+                //     this.client.setRank(permissions.none)
+                // }
                 var motd = server.manager.get_prop(this.world.name, "motd")
                 if (motd) {
                     this.client.send(motd)
                 }
+
                 this.client.setId(this.world.latestId)
                 this.world.latestId++
                 this.player = true;
@@ -123,6 +128,9 @@ export class Connection {
                     b: 0,
                     tool: 0
                 })
+
+                server.updateClock.doInitialUpdate(this.world.name, this.client);
+
                 for (var w in this.world.clients) {
                     var cli = this.world.clients[w];
                     var upd = {

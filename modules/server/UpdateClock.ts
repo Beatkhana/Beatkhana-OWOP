@@ -13,6 +13,7 @@ export class UpdateClock {
     }
 
     updateClock() {
+        // var pinfo_t_SIZE = 4 + 4 + 1 + 1 + 1 + 1 + 32;
         var pinfo_t_SIZE = 4 + 4 + 1 + 1 + 1 + 1;
         var pixupd_t_SIZE = 4 + 4 + 4 + 1 + 1 + 1;
 
@@ -21,6 +22,8 @@ export class UpdateClock {
             var pxupdates = this.updates[i][1];
             var plleft = this.updates[i][2];
 
+            // let nickLengths = plupdates.map(x => x.nick?.length ?? 0).reduce((a, b) => a + b, 0);
+            // console.log(plupdates.map(x => x.nick?.length));
             var updSize = (1 + 1 + plupdates.length * (4 + pinfo_t_SIZE) +
                 2 + pxupdates.length * pixupd_t_SIZE +
                 1 + 4 * plleft.length);
@@ -36,6 +39,7 @@ export class UpdateClock {
             var offs = 2;
 
             var tmp = 0;
+            // var enc = new TextEncoder();
             for (var u = 0; u < plupdates.length; u++) {
                 var client = plupdates[u];
 
@@ -48,7 +52,11 @@ export class UpdateClock {
                 upd_dv.setUint8(offs + 4 + 4 + 1, client.g);
                 upd_dv.setUint8(offs + 4 + 4 + 1 + 1, client.b);
                 upd_dv.setUint8(offs + 4 + 4 + 1 + 1 + 1, client.tool);
-
+                // let nick = client.nick ?? "";
+                // let encodedNick = enc.encode(nick.padEnd(32, " "));
+                // for (let index = 0; index < encodedNick.length; index++) {
+                //     upd_dv.setUint8(offs + 4 + 4 + 1 + 1 + 1 + 1 + index, encodedNick[index]);
+                // }
                 offs += pinfo_t_SIZE;
                 tmp++;
             }
@@ -83,7 +91,7 @@ export class UpdateClock {
 
             delete this.updates[i];
 
-            var wld = server.worlds.find(function (world) { return world.name == i }.bind(this));;
+            var wld = server.worlds.find(function (world) { return world.name == i }.bind(this));
             if (!wld) continue; // Shouldn't happen
 
             var clients = wld.clients;
@@ -112,6 +120,80 @@ export class UpdateClock {
     doUpdatePlayerPos(world, client) {
         var upd = this.getUpdObj(world)[0];
         upd.push(client)
+    }
+
+    doInitialUpdate(world, client) {
+        var wld = server.worlds.find((x) => x.name == world);
+
+        var pinfo_t_SIZE = 32;
+
+        var updSize = (1 + 1 + wld.clients.length * (4 + pinfo_t_SIZE));
+
+        var upd = new Uint8Array(updSize);
+
+        upd[0] = protocol.server.initialUpdate;
+
+        var upd_dv = new DataView(upd.buffer);
+
+        var offs = 2;
+
+        var tmp = 0;
+        var enc = new TextEncoder();
+        for (var u = 0; u < wld.clients.length; u++) {
+            var client = wld.clients[u];
+
+            upd_dv.setUint32(offs, client.id, true);
+            offs += 4;
+
+            let nick = client.nick ?? "";
+            let encodedNick = enc.encode(nick.padEnd(32, " "));
+            for (let index = 0; index < encodedNick.length; index++) {
+                upd_dv.setUint8(offs + index, encodedNick[index]);
+            }
+            offs += pinfo_t_SIZE;
+            tmp++;
+        }
+
+        upd[1] = tmp;
+
+        client.send(upd);
+        this.playerConnectedUpdate(world, client);
+    }
+
+    playerConnectedUpdate(world, client) {
+        var wld = server.worlds.find((x) => x.name == world);
+
+        var pinfo_t_SIZE = 32;
+
+        var updSize = (1 + 1 + 4 + pinfo_t_SIZE);
+
+        var upd = new Uint8Array(updSize);
+
+        upd[0] = protocol.server.playerJoined;
+
+        var upd_dv = new DataView(upd.buffer);
+
+        var offs = 2;
+        var enc = new TextEncoder();
+
+        upd_dv.setUint32(offs, client.id, true);
+        offs += 4;
+
+        let nick = client.nick ?? "";
+        let encodedNick = enc.encode(nick.padEnd(32, " "));
+        for (let index = 0; index < encodedNick.length; index++) {
+            upd_dv.setUint8(offs + index, encodedNick[index]);
+        }
+
+        upd[1] = 1;
+
+        var clients = wld.clients;
+
+        for (var c = 0; c < clients.length; c++) {
+            var client = clients[c];
+            var send = client.send;
+            send(upd)
+        }
     }
 
     doUpdatePixel(world, pixelData) {
