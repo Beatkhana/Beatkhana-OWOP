@@ -14,6 +14,7 @@ export class Client {
     col_b: number;
     tool: number;
     id: number;
+    discordId: string;
     nick: string;
     before: string;
     send: (data: any) => void;
@@ -36,10 +37,11 @@ export class Client {
         this.col_b = 0;
         this.tool = 0;
         this.id = 0;
+        this.discordId = "";
         this.nick = "";
         if (req.session?.user?.length > 0) {
             this.nick = req.session.user[0].name;
-            this.id = +req.session.user[0].discordId;
+            this.discordId = req.session.user[0].discordId;
         }
         this.before = "";
         this.send = function (data) {

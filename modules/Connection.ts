@@ -116,9 +116,11 @@ export class Connection {
                 this.world.latestId++
                 this.player = true;
                 this.world.clients.push(this.client);
+                console.log(this.world.clients.length);
                 server.events.emit("join", this.client)
 
                 // send client list to that client
+                // server.updateClock.doUpdateNicknames(this.world, this.client);
                 server.updateClock.doUpdatePlayerPos(this.world.name, {
                     id: this.client.id,
                     x: 0,
@@ -127,9 +129,7 @@ export class Connection {
                     g: 0,
                     b: 0,
                     tool: 0
-                })
-
-                server.updateClock.doInitialUpdate(this.world.name, this.client);
+                });
 
                 for (var w in this.world.clients) {
                     var cli = this.world.clients[w];
@@ -142,7 +142,9 @@ export class Connection {
                         b: cli.col_b,
                         tool: cli.tool
                     };
-                    server.updateClock.doUpdatePlayerPos(this.world.name, upd)
+                    
+                    server.updateClock.doUpdatePlayerDiscordInfo(this.world, cli);
+                    server.updateClock.doUpdatePlayerPos(this.world.name, upd);
                 }
             }
 

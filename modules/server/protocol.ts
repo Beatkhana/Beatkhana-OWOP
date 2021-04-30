@@ -9,8 +9,7 @@ export let protocol = {
         setPQuota: 6,
         chunkProtected: 7,
         maxCount: 8,
-        initialUpdate: 9,
-        playerJoined: 10
+        discordInfoUpdate: 9,
     },
     client: {
         rankVerification: 1,

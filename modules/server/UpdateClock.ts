@@ -122,78 +122,50 @@ export class UpdateClock {
         upd.push(client)
     }
 
-    doInitialUpdate(world, client) {
-        var wld = server.worlds.find((x) => x.name == world);
-
-        var pinfo_t_SIZE = 32;
-
-        var updSize = (1 + 1 + wld.clients.length * (4 + pinfo_t_SIZE));
-
-        var upd = new Uint8Array(updSize);
-
-        upd[0] = protocol.server.initialUpdate;
-
-        var upd_dv = new DataView(upd.buffer);
-
-        var offs = 2;
-
-        var tmp = 0;
+    doUpdatePlayerDiscordInfo(world, client) {
+        // Find world by name
+        // var world = server.worlds.find((x) => x.name == world);
         var enc = new TextEncoder();
-        for (var u = 0; u < wld.clients.length; u++) {
-            var client = wld.clients[u];
 
-            upd_dv.setUint32(offs, client.id, true);
-            offs += 4;
+        var clientIdSize = 4;
+        var clientNickSize = 32;
+        var clientDiscordIdSize = 32;
 
-            let nick = client.nick ?? "";
+        var updateSize = 1 + 1 + world.clients.length * (clientIdSize + clientNickSize + clientDiscordIdSize);
+
+        var update = new Uint8Array(updateSize);
+        update[0] = protocol.server.discordInfoUpdate;
+        
+        var updateDataView = new DataView(update.buffer);
+        var offset = 2;
+        var tmp = 0;
+        for (var u = 0; u < world.clients.length; u++) {
+            var cli = world.clients[u];
+
+            updateDataView.setUint32(offset, cli.id, true);
+            offset += clientIdSize;
+
+            let nick = cli.nick ?? "";
             let encodedNick = enc.encode(nick.padEnd(32, " "));
             for (let index = 0; index < encodedNick.length; index++) {
-                upd_dv.setUint8(offs + index, encodedNick[index]);
+                updateDataView.setUint8(offset + index, encodedNick[index]);
             }
-            offs += pinfo_t_SIZE;
+
+            offset += clientNickSize;
+
+            let discordId = cli.discordId ?? "";
+            let encodedDiscordId = enc.encode(discordId.padEnd(32, " "));
+            for (let index = 0; index < encodedDiscordId.length; index++) {
+                updateDataView.setUint8(offset + index, encodedDiscordId[index]);
+            }
+
+            offset += clientDiscordIdSize;
+
             tmp++;
         }
 
-        upd[1] = tmp;
-
-        client.send(upd);
-        this.playerConnectedUpdate(world, client);
-    }
-
-    playerConnectedUpdate(world, client) {
-        var wld = server.worlds.find((x) => x.name == world);
-
-        var pinfo_t_SIZE = 32;
-
-        var updSize = (1 + 1 + 4 + pinfo_t_SIZE);
-
-        var upd = new Uint8Array(updSize);
-
-        upd[0] = protocol.server.playerJoined;
-
-        var upd_dv = new DataView(upd.buffer);
-
-        var offs = 2;
-        var enc = new TextEncoder();
-
-        upd_dv.setUint32(offs, client.id, true);
-        offs += 4;
-
-        let nick = client.nick ?? "";
-        let encodedNick = enc.encode(nick.padEnd(32, " "));
-        for (let index = 0; index < encodedNick.length; index++) {
-            upd_dv.setUint8(offs + index, encodedNick[index]);
-        }
-
-        upd[1] = 1;
-
-        var clients = wld.clients;
-
-        for (var c = 0; c < clients.length; c++) {
-            var client = clients[c];
-            var send = client.send;
-            send(upd)
-        }
+        update[1] = tmp;
+        client.send(update);
     }
 
     doUpdatePixel(world, pixelData) {
