@@ -1,7 +1,7 @@
 /node_modules
 /config.json
 /chunkdata
-/server/chunkdata
+/modules/server/chunkdata
 /database/database.db-journal
 /database/database.db
 package-lock.json
