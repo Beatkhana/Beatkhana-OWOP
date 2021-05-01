@@ -147,7 +147,7 @@ export class Connection {
                         tool: cli.tool
                     };
                     
-                    server.updateClock.doUpdatePlayerDiscordInfo(this.world, cli);
+                    server.updateClock.doUpdatePlayerDiscordInfo(this.world, cli, this.client);
                     server.updateClock.doUpdatePlayerPos(this.world.name, upd);
                 }
             }

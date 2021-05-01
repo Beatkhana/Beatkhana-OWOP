@@ -122,7 +122,7 @@ export class UpdateClock {
         upd.push(client)
     }
 
-    doUpdatePlayerDiscordInfo(world, client) {
+    doUpdatePlayerDiscordInfo(world, client, newClient = null) {
         // Find world by name
         // var world = server.worlds.find((x) => x.name == world);
         var enc = new TextEncoder();
@@ -131,16 +131,21 @@ export class UpdateClock {
         var clientNickSize = 32;
         var clientDiscordIdSize = 32;
 
-        var updateSize = 1 + 1 + world.clients.length * (clientIdSize + clientNickSize + clientDiscordIdSize);
+        let clients = world.clients;
+        if (newClient && client.id != newClient.id) {
+            clients = clients.filter(cli => cli.id == newClient.id);
+        }
 
+        var updateSize = 1 + 1 + clients.length * (clientIdSize + clientNickSize + clientDiscordIdSize);
+    
         var update = new Uint8Array(updateSize);
         update[0] = protocol.server.discordInfoUpdate;
         
         var updateDataView = new DataView(update.buffer);
         var offset = 2;
         var tmp = 0;
-        for (var u = 0; u < world.clients.length; u++) {
-            var cli = world.clients[u];
+        for (var u = 0; u < clients.length; u++) {
+            var cli = clients[u];
 
             updateDataView.setUint32(offset, cli.id, true);
             offset += clientIdSize;
