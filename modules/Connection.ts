@@ -101,6 +101,10 @@ export class Connection {
 
                 if (this.req.session.user) {
                     this.client.setRank(permissions.user);
+
+                    if (this.world.latestId == 3) {
+                        this.client.setRank(permissions.admin);
+                    }
                 }
                 // var pass = server.manager.get_prop(this.world.name, "pass");
                 // if (pass) {

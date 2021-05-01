@@ -285,9 +285,9 @@ export class Commands {
         }
     }
     ban() { // crazy and ugly sorry
-        let id = this.args[0];
+        let needle = this.args[0];
         let target = this.world.clients.find(function (item) {
-            return item.id == id
+            return item.id == needle || item.discordId == needle || item.nick == needle;
         }.bind(this))
 
         if (target) {
@@ -314,6 +314,13 @@ export class Commands {
                 realDuration = realDuration * 60 * 60 * 24 * 365;
             }
             server.bansManager.addBanIp(ip, reason, realDuration);
+
+            var discordId = this.client.discordId;
+            if (discordId) {
+                server.discordBansManager.addBanDiscordId(discordId, reason, realDuration);
+                server.players.sendToAll(`DEVBanned discordId ${discordId}. Reason: ${reason}`, commandsPermissions[this.command]);
+            }
+
             server.players.sendToAll(`DEVBanned ip ${ip}. Reason: ${reason}`, commandsPermissions[this.command]);
             let banString = `${server.config.messages.unbanMessage}\nYou are permanently banned!\nReason: ${reason}`;
             if (!perm) {
@@ -325,10 +332,17 @@ export class Commands {
                 client.ws.close();
             });
 
-        } else if (!target && id) {
-            this.client.send(`User with id ${id} not found.`)
+            if (discordId) {
+                server.players.getAllPlayersWithDiscordId(discordId).forEach((client) => {
+                    client.send(banString);
+                    client.ws.close();
+                });
+            }
+
+        } else if (!target && needle) {
+            this.client.send(`User not found.`)
         } else {
-            this.client.send("Usage:\n /ban [id] [duration] [timeunit] [reason]");
+            this.client.send("Usage:\n /ban [id,discordID,nickname] [duration] [timeunit] [reason]");
         }
     }
     unbanip() {

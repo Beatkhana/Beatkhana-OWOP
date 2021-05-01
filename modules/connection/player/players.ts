@@ -12,6 +12,18 @@ function getAllPlayersWithIp(ip) {
     return players;
 }
 
+function getAllPlayersWithDiscordId(discordId) {
+    var players = [];
+    for (var i = 0; i < server.worlds.length; i++) {
+        var world = server.worlds[i];
+        for (var c = 0; c < world.clients.length; c++) {
+            var client = world.clients[c];
+            if (client.discordId == discordId) players.push(client);
+        }
+    }
+    return players;
+}
+
 function sendToAll(message, rank = 0) {
     for (var i = 0; i < server.worlds.length; i++) {
         var world = server.worlds[i];

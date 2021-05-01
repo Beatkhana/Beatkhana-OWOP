@@ -60,6 +60,7 @@ var config = require("./config.json");
 var terminatedSocketServer = false;
 import { ConfigManager } from "./modules/server/ConfigManager";
 import { BansManager } from "./modules/server/BansManager";
+import { DiscordBansManager } from "./modules/server/DiscordBansManager";
 let proxy_check = require('proxycheck-node.js');
 import { EventEmitter } from "events";
 
@@ -68,6 +69,7 @@ export const server = {
     chalk: require("chalk"),
     worlds: [],
     bans: require("./bans.json"),
+    discordBans: require("./discord_bans.json"),
     config,
     updateClock: new UpdateClock(),
     manager,
@@ -76,6 +78,7 @@ export const server = {
     disabledScripts: [],
     ConfigManager,
     bansManager: new BansManager(),
+    discordBansManager: new DiscordBansManager(),
     players: require("./modules/connection/player/players"),
     antiProxy: new proxy_check({
         api_key: config.antiProxy.key
@@ -133,6 +136,19 @@ function createWSServer() {
                 ws.close();
                 return;
             }
+
+            if (server.discordBansManager.checkIfIsBanned(req.session.user.discordId ?? '')) {
+                let ban = server.discordBansManager.bans[req.session.user.discordId ?? '']
+                if (!isNaN(ban.duration)) {
+                    let banString = server.bansManager.generateString(server.bansManager.banEndsAfter(req.session.user.discordId ?? ''))
+                    ws.send(`${server.config.messages.unbanMessage}\nYou are banned for ${banString}\nReason: ${ban.reason}`);
+                } else {
+                    ws.send(`${server.config.messages.unbanMessage}\nYou are permanently banned!\nReason: ${ban.reason}`);
+                }
+                ws.close();
+                return;
+            }
+
             if (server.config.maxConnections > 0) {
                 if (server.players.getAllPlayers().length >= server.config.maxConnections) { //yes ik about that if there is many players this is slow method... or not?
                     ws.send("Reached max connections limit")
