@@ -98,11 +98,18 @@ export class Connection {
 
                 this.client.setRank(permissions.none);
 
-                if (this.req.session.user) {
-                    this.client.setRank(permissions.user);
-
-                    if (this.world.latestId == 3) {
+                if (this.req.session.user[0]) {
+                    // bk role ids
+                    // 1: Site Admin
+                    // 2: Site Staff
+                    // 7: Owop Admin
+                    // 8: Owop Mod
+                    if (this.req.session?.user[0].roleIds.includes("1") || this.req.session?.user[0].roleIds.includes("7")) {
                         this.client.setRank(permissions.admin);
+                    } else if (this.req.session?.user[0].roleIds.includes("2") || this.req.session?.user[0].roleIds.includes("8")) {
+                        this.client.setRank(permissions.mod);
+                    } else {
+                        this.client.setRank(permissions.user);
                     }
                 }
                 // var pass = server.manager.get_prop(this.world.name, "pass");
@@ -119,7 +126,7 @@ export class Connection {
                 this.world.latestId++
                 this.player = true;
                 this.world.clients.push(this.client);
-                console.log(this.world.clients.length);
+
                 server.events.emit("join", this.client)
 
                 // send client list to that client
