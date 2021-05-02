@@ -98,7 +98,7 @@ export class Connection {
 
                 this.client.setRank(permissions.none);
 
-                if (this.req.session.user[0]) {
+                if (this.req.session.user?.length > 0) {
                     // bk role ids
                     // 1: Site Admin
                     // 2: Site Staff
