@@ -137,8 +137,8 @@ function createWSServer() {
                 return;
             }
 
-            if (server.discordBansManager.checkIfIsBanned(req.session.user.discordId ?? '')) {
-                let ban = server.discordBansManager.bans[req.session.user.discordId ?? '']
+            if (server.discordBansManager.checkIfIsBanned(req.session?.user?.discordId ?? '')) {
+                let ban = server.discordBansManager.bans[req.session?.user?.discordId ?? '']
                 if (!isNaN(ban.duration)) {
                     let banString = server.bansManager.generateString(server.bansManager.banEndsAfter(req.session.user.discordId ?? ''))
                     ws.send(`${server.config.messages.unbanMessage}\nYou are banned for ${banString}\nReason: ${ban.reason}`);

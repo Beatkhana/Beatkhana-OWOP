@@ -97,7 +97,6 @@ export class Connection {
                 }
 
                 this.client.setRank(permissions.none);
-                // this.client.setRank(permissions.user);
 
                 if (this.req.session.user) {
                     this.client.setRank(permissions.user);
@@ -124,7 +123,6 @@ export class Connection {
                 server.events.emit("join", this.client)
 
                 // send client list to that client
-                // server.updateClock.doUpdateNicknames(this.world, this.client);
                 server.updateClock.doUpdatePlayerPos(this.world.name, {
                     id: this.client.id,
                     x: 0,
@@ -146,7 +144,7 @@ export class Connection {
                         b: cli.col_b,
                         tool: cli.tool
                     };
-                    
+
                     server.updateClock.doUpdatePlayerDiscordInfo(this.world, cli, this.client);
                     server.updateClock.doUpdatePlayerPos(this.world.name, upd);
                 }

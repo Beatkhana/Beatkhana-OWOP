@@ -129,7 +129,7 @@ export class UpdateClock {
 
         var clientIdSize = 4;
         var clientNickSize = 32;
-        var clientDiscordIdSize = 32;
+        var clientDiscordIdSize = 18;
 
         let clients = world.clients;
         if (newClient && client.id != newClient.id) {
@@ -137,10 +137,10 @@ export class UpdateClock {
         }
 
         var updateSize = 1 + 1 + clients.length * (clientIdSize + clientNickSize + clientDiscordIdSize);
-    
+
         var update = new Uint8Array(updateSize);
         update[0] = protocol.server.discordInfoUpdate;
-        
+
         var updateDataView = new DataView(update.buffer);
         var offset = 2;
         var tmp = 0;
@@ -151,7 +151,7 @@ export class UpdateClock {
             offset += clientIdSize;
 
             let nick = cli.nick ?? "";
-            let encodedNick = enc.encode(nick.padEnd(32, " "));
+            let encodedNick = enc.encode(nick.padEnd(clientNickSize, " "));
             for (let index = 0; index < encodedNick.length; index++) {
                 updateDataView.setUint8(offset + index, encodedNick[index]);
             }
@@ -159,7 +159,7 @@ export class UpdateClock {
             offset += clientNickSize;
 
             let discordId = cli.discordId ?? "";
-            let encodedDiscordId = enc.encode(discordId.padEnd(32, " "));
+            let encodedDiscordId = enc.encode(discordId.padEnd(clientDiscordIdSize, " "));
             for (let index = 0; index < encodedDiscordId.length; index++) {
                 updateDataView.setUint8(offset + index, encodedDiscordId[index]);
             }
